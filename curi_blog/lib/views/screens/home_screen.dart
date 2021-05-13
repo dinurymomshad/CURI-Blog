@@ -58,7 +58,7 @@ class HomeScreen extends StatelessWidget {
                     style: KTextStyle.headline4.copyWith(fontSize: 30, fontWeight: FontWeight.bold),
                   )
                 ]),
-              ),
+              ).px(17),
 
               /// Search Bar
               Container(
@@ -81,26 +81,38 @@ class HomeScreen extends StatelessWidget {
                     bgColor: KColor.blackColor,
                   );
                 }),
-              ).cornerRadius(5).pOnly(top: 20),
+              ).cornerRadius(5).pOnly(top: 20).px(17),
 
               /// Category
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// Header
-                  Text("Category",
-                      style: KTextStyle.headline6.copyWith(
-                        color: KColor.blackColor,
-                        fontWeight: FontWeight.bold,
-                      )),
+              Consumer(
+                builder: (context, watch, child) {
+                  final categoriesState = watch(categoriesProvider.state);
+                  Random _random = Random();
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Category",
+                              style: KTextStyle.headline6.copyWith(
+                                color: KColor.blackColor,
+                                fontWeight: FontWeight.bold,
+                              )),
+                          categoriesState is RequestLoadedState
+                              ? Container()
+                              : IconButton(
+                                  onPressed: () => context.read(categoriesProvider).categories(),
+                                  icon: Icon(Icons.refresh),
+                                  visualDensity: VisualDensity.compact,
+                                )
+                        ],
+                      ).px(17).pOnly(bottom: 10),
 
-                  /// Category Slider
-                  Consumer(
-                    builder: (context, watch, _) {
-                      final categoriesState = watch(categoriesProvider.state);
-                      final _random = Random();
-                      return categoriesState is RequestLoadedState
+                      /// Category Slider
+                      categoriesState is RequestLoadedState
                           ? Container(
                               height: 50,
                               child: ListView.builder(
@@ -121,7 +133,7 @@ class HomeScreen extends StatelessWidget {
                                       context.nextPage(PostList(categoriesState.responseObject[index].name));
                                     });
                                   }),
-                            ).pOnly(top: 10)
+                            ).pOnly(left: 17)
                           : Container(
                               height: 50,
                               child: ListView.builder(
@@ -142,11 +154,11 @@ class HomeScreen extends StatelessWidget {
                                       ).cornerRadius(10).pOnly(right: 10),
                                     );
                                   }),
-                            ).pOnly(top: 10);
-                    },
-                  )
-                ],
-              ).pOnly(top: 20),
+                            ).pOnly(left: 17)
+                    ],
+                  ).pOnly(top: 20);
+                },
+              ),
 
               /// Recent post
               Column(
@@ -180,9 +192,9 @@ class HomeScreen extends StatelessWidget {
                     },
                   )
                 ],
-              ).pOnly(top: 20),
+              ).pOnly(top: 20).px(17),
             ],
-          ).p(17),
+          ).pOnly(top: 10),
         ),
       ),
     );
