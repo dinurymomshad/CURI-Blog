@@ -8,7 +8,6 @@ App Name: CUBE (BETA)
 * [Team members](#team-members)
 * [App Directory](#app-directory)
 * [App Features](#app-features)
-* [API](#api)
 * [Attribution](#attribution)
 
 ## Resources Used
