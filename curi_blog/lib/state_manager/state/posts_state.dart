@@ -23,3 +23,29 @@ class PostsErrorState extends PostsState {
 
   const PostsErrorState(this.message);
 }
+
+/*Featured posts*/
+
+abstract class FeaturedPostsState {
+  const FeaturedPostsState();
+}
+
+class FeaturedPostsInitialState extends FeaturedPostsState {
+  const FeaturedPostsInitialState();
+}
+
+class FeaturedPostsLoadingState extends FeaturedPostsState {
+  const FeaturedPostsLoadingState();
+}
+
+class FeaturedPostsLoadedState extends FeaturedPostsState {
+  final List<Posts> posts;
+
+  const FeaturedPostsLoadedState(this.posts);
+}
+
+class FeaturedPostsErrorState extends FeaturedPostsState {
+  final String message;
+
+  const FeaturedPostsErrorState(this.message);
+}

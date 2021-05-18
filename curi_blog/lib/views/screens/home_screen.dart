@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:curi_blog/state_manager/provider/categories_provider.dart';
 import 'package:curi_blog/state_manager/provider/posts_provider.dart';
 import 'package:curi_blog/state_manager/state/posts_state.dart';
@@ -11,11 +10,12 @@ import 'package:curi_blog/views/styles/colors.dart';
 import 'package:curi_blog/views/styles/text_style.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'all_article_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key key}) : super(key: key);
@@ -160,17 +160,72 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
 
+              /// Featured
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Featured", style: KTextStyle.headline6.copyWith(color: KColor.blackColor, fontWeight: FontWeight.bold)),
+                      /*TextButton(
+                        style: ButtonStyle(visualDensity: VisualDensity.compact),
+                        child: Text("View all", style: KTextStyle.subtitle2),
+                        onPressed: () => context.nextPage(AllArticleScreen()),
+                      ),*/
+                    ],
+                  ).pOnly(left: 17),
+
+                  /// Featured Post List
+                  Consumer(
+                    builder: (context, watch, _) {
+                      final postsState = watch(featuredPostsProvider.state);
+
+                      return postsState is FeaturedPostsLoadedState
+                          ? Container(
+                              height: context.screenHeight * .50,
+                              width: context.screenWidth,
+                              child: ListView.builder(
+                                  shrinkWrap: true,
+                                  padding: EdgeInsets.only(top: 10),
+                                  physics: BouncingScrollPhysics(),
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: postsState.posts.length,
+                                  itemBuilder: (context, index) {
+                                    return Container(
+                                      width: context.screenWidth * .80,
+                                      child: PostCard(postsState: postsState, index: index, showExcerpt: false).pOnly(bottom: 20, left: 17, right: 17).onInkTap(() {
+                                        context.read(postProvider).post(postsState.posts[index].id);
+                                        context.nextPage(DetailsScreen(post: postsState.posts[index]));
+                                      }),
+                                    );
+                                  }),
+                            )
+                          : PostsLoadingIndicator().px(17);
+                    },
+                  )
+                ],
+              ).pOnly(top: 20),
+
               /// Recent post
               Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   /// Header
-                  Text("Latest",
-                      style: KTextStyle.headline6.copyWith(
-                        color: KColor.blackColor,
-                        fontWeight: FontWeight.bold,
-                      )),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Latest", style: KTextStyle.headline6.copyWith(color: KColor.blackColor, fontWeight: FontWeight.bold)),
+                      TextButton(
+                        style: ButtonStyle(visualDensity: VisualDensity.compact),
+                        child: Text("View all", style: KTextStyle.subtitle2),
+                        onPressed: () => context.nextPage(AllArticleScreen()),
+                      ),
+                    ],
+                  ),
 
                   /// Post List
                   Consumer(
@@ -181,13 +236,13 @@ class HomeScreen extends StatelessWidget {
                           ? ListView.builder(
                               shrinkWrap: true,
                               physics: BouncingScrollPhysics(),
-                              itemCount: postsState.posts.length,
+                              itemCount: postsState.posts.length > 10 ? 10 : postsState.posts.length,
                               itemBuilder: (context, index) {
                                 return PostCard(postsState: postsState, index: index).pOnly(bottom: 20).onInkTap(() {
                                   context.read(postProvider).post(postsState.posts[index].id);
                                   context.nextPage(DetailsScreen(post: postsState.posts[index]));
                                 });
-                              }).pOnly(top: 10)
+                              })
                           : PostsLoadingIndicator();
                     },
                   )
@@ -196,98 +251,6 @@ class HomeScreen extends StatelessWidget {
             ],
           ).pOnly(top: 10),
         ),
-      ),
-    );
-  }
-}
-
-class PostCard extends StatefulWidget {
-  const PostCard({Key key, @required this.postsState, @required this.index}) : super(key: key);
-
-  final dynamic postsState;
-  final int index;
-
-  @override
-  _PostCardState createState() => _PostCardState();
-}
-
-class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
-  AnimationController animationController;
-
-  @override
-  void dispose() {
-    animationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    animationController = AnimationController(duration: new Duration(seconds: 2), vsync: this);
-    animationController.repeat();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: KColor.whiteColor,
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-        boxShadow: [
-          BoxShadow(
-            offset: const Offset(0, 3),
-            color: KColor.categoryColor[Random().nextInt(KColor.categoryColor.length)].withOpacity(0.15),
-            blurRadius: 5.0,
-            spreadRadius: 2.0,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: context.screenHeight * .30,
-            width: context.screenWidth,
-            child: widget.postsState.posts[widget.index].featuredImage != 'false'
-                ? Image.network(
-                    widget.postsState.posts[widget.index].featuredImage,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1.5,
-                          valueColor: animationController.drive(ColorTween(begin: Colors.blueAccent, end: Colors.red)),
-                          /*value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                              : null,*/
-                        ),
-                      );
-                    },
-                  )
-                : Image.network(
-                    "https://www.sgpthorncliffe.com/wp-content/uploads/2016/08/jk-placeholder-image.jpg",
-                    fit: BoxFit.cover,
-                  ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.postsState.posts[widget.index].title,
-                style: KTextStyle.body1.copyWith(fontWeight: FontWeight.bold),
-              ).pOnly(bottom: 5),
-              HtmlWidget(widget.postsState.posts[widget.index].excerpt.trim(), textStyle: KTextStyle.body2, enableCaching: true, webView: true)
-                  .pOnly(bottom: 5),
-              Row(
-                children: [
-                  Text(widget.postsState.posts[widget.index].author, style: KTextStyle.subtitle2).pOnly(right: 20),
-                  Text(widget.postsState.posts[widget.index].published, style: KTextStyle.subtitle2),
-                ],
-              )
-            ],
-          ).p(10)
-        ],
       ),
     );
   }

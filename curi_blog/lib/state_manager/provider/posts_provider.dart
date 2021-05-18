@@ -5,5 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final _postsRepositoryProvider = Provider<IPostsRepository>((ref) => PostsRepository());
 final postsProvider = StateNotifierProvider((ref) => PostsNotifier(ref.watch(_postsRepositoryProvider)));
+final featuredPostsProvider = StateNotifierProvider((ref) => FeaturedPostsNotifier(ref.watch(_postsRepositoryProvider)));
 final postProvider = StateNotifierProvider((ref) => PostNotifier(ref.watch(_postsRepositoryProvider)));
 final postsByCategoryProvider = StateNotifierProvider((ref) => PostsByCategoryNotifier(ref.watch(_postsRepositoryProvider)));

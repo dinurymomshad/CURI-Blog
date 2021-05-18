@@ -18,6 +18,32 @@ class PostsNotifier extends StateNotifier<PostsState> {
       state = PostsErrorState("Something went wrong!");
     }
   }
+
+  Future getMorePosts() async {
+    try {
+      //state = PostsLoadingState();
+      final posts = await _iPostsRepository.morePosts();
+      state = PostsLoadedState(posts);
+    } on NetworkException {
+      state = PostsErrorState("Something went wrong!");
+    }
+  }
+}
+
+class FeaturedPostsNotifier extends StateNotifier<FeaturedPostsState> {
+  final IPostsRepository _iPostsRepository;
+
+  FeaturedPostsNotifier(this._iPostsRepository) : super(FeaturedPostsInitialState());
+
+  Future featuredPosts() async {
+    try {
+      state = FeaturedPostsLoadingState();
+      final posts = await _iPostsRepository.featuredPosts();
+      state = FeaturedPostsLoadedState(posts);
+    } on NetworkException {
+      state = FeaturedPostsErrorState("Something went wrong!");
+    }
+  }
 }
 
 class PostNotifier extends StateNotifier<RequestState> {
@@ -44,8 +70,17 @@ class PostsByCategoryNotifier extends StateNotifier<RequestState> {
   Future postsByCategory(categoryID) async {
     try {
       state = RequestLoadingState();
-      final post = await _iPostsRepository.postsByCategory(categoryID);
-      state = RequestLoadedState(post);
+      final posts = await _iPostsRepository.postsByCategory(categoryID);
+      state = RequestLoadedState(posts);
+    } on NetworkException {
+      state = RequestErrorState("Something went wrong!");
+    }
+  }
+
+  Future getMorePostsByCategory() async {
+    try {
+      final posts = await _iPostsRepository.morePostsByCategory();
+      state = RequestLoadedState(posts);
     } on NetworkException {
       state = RequestErrorState("Something went wrong!");
     }

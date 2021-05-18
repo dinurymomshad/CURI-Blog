@@ -5,10 +5,16 @@ import 'package:http/http.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class Network {
-  static getRequest(String endpoint) async {
+  static getRequest(String endpoint, {bool noBaseUrl = false}) async {
     Response response;
-    print('URL: ${API.base}$endpoint');
-    response = await get('${API.base}$endpoint');
+
+    if (noBaseUrl) {
+      print('URL: $endpoint');
+      response = await get(endpoint);
+    } else {
+      print('URL: ${API.base}$endpoint');
+      response = await get('${API.base}$endpoint');
+    }
     return response;
   }
 

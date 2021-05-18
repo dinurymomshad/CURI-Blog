@@ -28,6 +28,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void fetchData() {
     context.read(categoriesProvider).categories();
     context.read(postsProvider).posts();
+    context.read(featuredPostsProvider).featuredPosts();
   }
 
   @override
